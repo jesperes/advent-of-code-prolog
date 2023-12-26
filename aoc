@@ -1,0 +1,8 @@
+#!/usr/bin/env swipl
+% -*- prolog -*-
+
+:- initialization(main, main).
+:- use_module(aocmain).
+
+main(Argv) :-
+    aocmain:aocmain(Argv).
