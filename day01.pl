@@ -1,5 +1,8 @@
 :- module(day01, [solve/1]).
 
+input_line(Line) :-
+    aocdata:input_line(1, Line).
+
 solve({part1, Sum}) :-
     findall(Value, calibration_values(Value, part1), Values),
     utils:sum(Values, Sum).
@@ -9,9 +12,7 @@ solve({part2, Sum}) :-
     utils:sum(Values, Sum).
 
 calibration_values(Value, Part) :-
-
-    filename(Filename),
-    utils:file_line(Filename, Line),
+    input_line(Line),
     string_to_list(Line, List),
     first_and_last_digits(First, Last, List, Part),
     number_codes(Value, [First, Last]).

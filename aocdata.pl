@@ -22,7 +22,6 @@ session_cookie(Cookie) :-
 input_file(Day, Filename) :-
     cache_filename(Day, Filename),
     access_file(Filename, read),
-    format("Using cached input for day ~w~n", [Day]),
     !.
 input_file(Day, Filename) :-
     format("Downloading input for day ~w~n", [Day]),
