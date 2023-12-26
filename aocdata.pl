@@ -1,7 +1,7 @@
-:- module(aocdata, [input/2,
-                    input_lines/2,
-                    session_cookie/1
-                   ]).
+:- module(aocdata,
+          [input/2,
+           input_line/2
+          ]).
 
 :- use_module(library(readutil)).
 :- use_module(library(http/http_client)).
@@ -15,13 +15,16 @@ session_cookie(Cookie) :-
     readutil:read_file_to_string(Filename, CookieRaw, []),
     normalize_space(string(Cookie), CookieRaw).
 
-input(Day, Input) :-
+%! input_file(+Day, -Filename)
+%
+% Download the input for the given day, and unify Filename with the
+% locally cached filename.
+input_file(Day, Filename) :-
     cache_filename(Day, Filename),
     access_file(Filename, read),
     format("Using cached input for day ~w~n", [Day]),
-    readutil:read_file_to_string(Filename, Input, []),
     !.
-input(Day, Input) :-
+input_file(Day, Filename) :-
     format("Downloading input for day ~w~n", [Day]),
     session_cookie(Cookie),
     swritef(URL, "https://adventofcode.com/%w/day/%w/input", [2023, Day]),
@@ -31,6 +34,28 @@ input(Day, Input) :-
     format("Cached input file in ~w~n", [Filename]),
     utils:write_to_file(Input, Filename).
 
-input_lines(Day, Lines) :-
-    input(Day, Input),
-    split_string(Input, "\n", "\n", Lines).
+%! input(+Day, -Input)
+%
+% Unified Input with the input data for the given day.
+input(Day, Input) :-
+    input_file(Day, Filename),
+    readutil:read_file_to_string(Filename, Input, []).
+
+%! input_line(+Day, -Line)
+%
+% Unifies Line with lines in the input data for the given day, such
+% that backtracking with yield all input lines in order.
+input_line(Day, Line) :-
+    input_file(Day, Filename),
+    setup_call_cleanup(open(Filename, read, In),
+                       stream_line(In, Line),
+                       close(In)).
+
+stream_line(In, Line) :-
+    repeat,
+    (  read_line_to_string(In, Line0),
+       Line0 \== end_of_file
+    -> Line0 = Line
+    ;  !,
+       fail
+    ).

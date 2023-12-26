@@ -1,7 +1,5 @@
 :- module(day01, [solve/1]).
 
-filename("input1.txt").
-
 solve({part1, Sum}) :-
     findall(Value, calibration_values(Value, part1), Values),
     utils:sum(Values, Sum).
@@ -11,6 +9,7 @@ solve({part2, Sum}) :-
     utils:sum(Values, Sum).
 
 calibration_values(Value, Part) :-
+
     filename(Filename),
     utils:file_line(Filename, Line),
     string_to_list(Line, List),
