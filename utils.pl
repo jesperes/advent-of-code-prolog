@@ -1,4 +1,5 @@
-:- module(utils, [file_line/2]).
+:- module(utils, [file_line/2,
+                  write_to_file/2]).
 
 file_line(File, Line) :-
     setup_call_cleanup(open(File, read, In),
@@ -21,3 +22,8 @@ sum([], Sum, Sum).
 sum([X|Xs], Sum, Acc) :-
     Acc0 is X + Acc,
     sum(Xs, Sum, Acc0).
+
+write_to_file(Data, Filename) :-
+    setup_call_cleanup(open(Filename, write, Stream),
+                       write(Stream, Data),
+                       close(Stream)).
