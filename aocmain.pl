@@ -10,20 +10,25 @@ repeat(100).
 
 aocmain(_) :-
     format("Benchmarking...~n", []),
-    findall(Day, benchmark_module(Day), _Result),
-    format("Done~n", []).
+    findall(Result, benchmark_module(_, Result), Results),
+    sort(Results, Sorted),
+    format_results(Sorted).
+
+format_results([]).
+format_results([Result|Rest]) :-
+    format_solution(Result),
+    format_results(Rest).
 
 %! Collect all the solution produced by the Module:solve/1 predicate.
 call_aoc_puzzle(Module, Solutions) :-
     findall(Solution, Module:solve(Solution), Solutions).
 
-benchmark_module(Module) :-
+benchmark_module(Module, {Module, Solution, TimeMsecs}) :-
     current_module(Module),
     module_property(Module, exports([solve/1])),
-    benchmark(call_aoc_puzzle(Module, Solution), TimeMsecs),
-    format_solution(Module, Solution, TimeMsecs).
+    benchmark(call_aoc_puzzle(Module, Solution), TimeMsecs).
 
-format_solution(Module, Solution, TimeMsecs) :-
+format_solution({Module, Solution, TimeMsecs}) :-
     format("~w: ~w msecs (~w)~n", [Module, TimeMsecs, Solution]).
 
 benchmark(Goal, TimeMsecs) :-
