@@ -2,7 +2,7 @@
 % -*- prolog -*-
 
 :- initialization(main, main).
-:- use_module(aocmain).
+:- use_module(main, [main/1 as aoc_main]).
 
 main(Argv) :-
-    aocmain:aocmain(Argv).
+    aoc_main(Argv).

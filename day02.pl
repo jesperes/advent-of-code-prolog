@@ -1,6 +1,7 @@
 :- module(day02, [solve/1]).
 
 :- use_module(utils).
+:- use_module(aocdata).
 
 solve({part1, P1}) :-
     findall(GameId, valid_game_id(GameId), GameIds),
@@ -10,7 +11,7 @@ solve({part2, P2}) :-
     sum(Powers, P2).
 
 game(GameId, Draws) :-
-    aocdata:input_line(2, Line),
+    input_line(2, Line),
     split_string(Line, " ", ":; ,", ["Game", GameIdStr|Draws]),
     number_string(GameId, GameIdStr).
 

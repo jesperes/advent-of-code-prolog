@@ -1,14 +1,15 @@
-:- module(aocmain, [aocmain/1]).
+:- module(main, [main/1]).
 
 :- use_module(library(prolog_stack)).
 :- use_module(utils).
 :- use_module(aocdata).
 :- use_module(day01, [solve/1 as solve_day1 ] ).
 :- use_module(day02, [solve/1 as solve_day2 ] ).
+:- use_module(day03, [solve/1 as solve_day3 ] ).
 
 repeat(100).
 
-aocmain(_) :-
+main(_) :-
     format("Benchmarking...~n", []),
     findall(Result, benchmark_module(_, Result), Results),
     sort(Results, Sorted),
@@ -29,7 +30,8 @@ benchmark_module(Module, {Module, Solution, TimeMsecs}) :-
     benchmark(call_aoc_puzzle(Module, Solution), TimeMsecs).
 
 format_solution({Module, Solution, TimeMsecs}) :-
-    format("~w: ~w msecs (~w)~n", [Module, TimeMsecs, Solution]).
+    swritef(Time, "%w msecs", [TimeMsecs]),
+    ansi_format([fg(cyan)], '~w ~w ~w~n', [Module, Time, Solution]).
 
 benchmark(Goal, TimeMsecs) :-
     statistics(walltime, _),

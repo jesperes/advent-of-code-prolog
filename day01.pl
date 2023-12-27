@@ -1,15 +1,18 @@
 :- module(day01, [solve/1]).
 
+:- use_module(utils).
+:- use_module(aocdata).
+
 input_line(Line) :-
-    aocdata:input_line(1, Line).
+    input_line(1, Line).
 
 solve({part1, Sum}) :-
     findall(Value, calibration_values(Value, part1), Values),
-    utils:sum(Values, Sum).
+    sum(Values, Sum).
 
 solve({part2, Sum}) :-
     findall(Value, calibration_values(Value, part2), Values),
-    utils:sum(Values, Sum).
+    sum(Values, Sum).
 
 calibration_values(Value, Part) :-
     input_line(Line),

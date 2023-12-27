@@ -3,6 +3,7 @@
            input_line/2
           ]).
 
+:- use_module(utils).
 :- use_module(library(readutil)).
 :- use_module(library(http/http_client)).
 
@@ -31,7 +32,7 @@ input_file(Day, Filename) :-
     http_get(URL, Input, [request_header('cookie'=CookieHeader)]),
     cache_filename(Day, Filename),
     format("Cached input file in ~w~n", [Filename]),
-    utils:write_to_file(Input, Filename).
+    write_to_file(Input, Filename).
 
 %! input(+Day, -Input)
 %
