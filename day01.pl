@@ -1,7 +1,6 @@
 :- module(day01, [solve/1]).
 
-:- use_module(utils).
-:- use_module(aocdata).
+:- use_module([utils, aocdata]).
 
 input_line(Line) :-
     input_line(1, Line).

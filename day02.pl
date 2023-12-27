@@ -1,7 +1,6 @@
 :- module(day02, [solve/1]).
 
-:- use_module(utils).
-:- use_module(aocdata).
+:- use_module([utils, aocdata]).
 
 solve({part1, P1}) :-
     findall(GameId, valid_game_id(GameId), GameIds),
