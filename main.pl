@@ -9,7 +9,7 @@
 :- use_module(day04, [solve/1 as solve_day4 ] ).
 
 repeat(100).
-max_msecs(50).
+max_msecs(1000).
 
 main(_) :-
     format("Benchmarking...~n", []),
@@ -32,7 +32,7 @@ benchmark_module(Module, {Module, Solution, Iters, TimeMsecs}) :-
     benchmark(call_aoc_puzzle(Module, Solution), Iters, TimeMsecs).
 
 format_solution({Module, Solution, Iters, TimeMsecs}) :-
-    writef("%w: %w msecs (%p) (%p iters)\n", [Module, TimeMsecs, Solution, Iters]).
+    format("~w ~`.t ~g msecs ~30|~p ~t~80|~p iters\n", [Module, TimeMsecs, Solution, Iters]).
 
 benchmark(Goal, Iters, TimeMsecs) :-
     statistics(walltime, [Start, _]),
