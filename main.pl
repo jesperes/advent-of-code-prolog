@@ -8,8 +8,6 @@
 :- use_module(day03, [solve/1 as solve_day3 ] ).
 :- use_module(day04, [solve/1 as solve_day4 ] ).
 
-repeat(100).
-max_msecs(1000).
 
 main(_) :-
     format("Benchmarking...~n", []),
@@ -26,34 +24,19 @@ format_results([Result|Rest]) :-
 call_aoc_puzzle(Module, Solutions) :-
     findall(Solution, Module:solve(Solution), Solutions).
 
-benchmark_module(Module, {Module, Solution, Iters, TimeMsecs}) :-
+benchmark_module(Module, {Module, Solution, TimeMsecs}) :-
     current_module(Module),
     module_property(Module, exports([solve/1])),
-    benchmark(call_aoc_puzzle(Module, Solution), Iters, TimeMsecs).
+    benchmark(call_aoc_puzzle(Module, Solution), TimeMsecs).
 
-format_solution({Module, Solution, Iters, TimeMsecs}) :-
-    format("~w ~`.t ~g msecs ~30|~p ~t~80|~p iters\n", [Module, TimeMsecs, Solution, Iters]).
+format_solution({Module, Solution, TimeMsecs}) :-
+    format("~w ~`.t ~g msecs ~30|~p\n", [Module, TimeMsecs, Solution]).
 
-benchmark(Goal, Iters, TimeMsecs) :-
+benchmark(Goal, TimeMsecs) :-
     statistics(walltime, [Start, _]),
-    repeat(Repeat),
-    max_msecs(MaxMsecs),
-    call_repeat(Repeat, Start, MaxMsecs, Goal, 0, Iters),
-    statistics(walltime, [Now, _]),
-    TotalTimeMsecs is Now - Start,
-    TimeMsecs is TotalTimeMsecs / Iters.
-
-call_repeat(0, _, _, _Goal, Iters, Iters).
-call_repeat(_, StartMsecs, MaxMsecs, _Goal, Iters, Iters) :-
-    statistics(walltime, [Now, _]),
-    Now - StartMsecs > MaxMsecs,
-    !.
-call_repeat(N, StartMsecs, MaxMsecs, Goal, Iters, NumIters) :-
-    N >= 0,
     call(Goal),
-    N0 is N - 1,
-    NextIters is Iters + 1,
-    call_repeat(N0, StartMsecs, MaxMsecs, Goal, NextIters, NumIters).
+    statistics(walltime, [Now, _]),
+    TimeMsecs is Now - Start.
 
 %% correct_answer(day01, [{part1,54391},{part2,54277}]).
 %% correct_answer(Module, Other) :-
