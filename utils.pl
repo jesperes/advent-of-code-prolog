@@ -2,7 +2,8 @@
                   line_width/2,
                   next_integer/1,
                   next_integer/2,
-                  seq/3
+                  seq/3,
+                  split_at/4
                  ]).
 
 %! Unify Width with the width of lines in Str.
@@ -30,3 +31,11 @@ next_integer(I, J) :-
 
 seq(Low, High, List) :-
     findall(X, between(Low, High, X), List).
+
+intlist_stringlist(IntList, StringList) :-
+    maplist(number_string, IntList, StringList).
+
+split_at([], _Elem, [], []).
+split_at([Elem|List], Elem, [], List) :- !.
+split_at([Elem|List], Sep, [Elem|L0], R0) :-
+    split_at(List, Sep, L0, R0).
