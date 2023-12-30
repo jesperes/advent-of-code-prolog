@@ -1,6 +1,7 @@
 :- module(aocdata,
           [input/2,
-           input_line/2
+           input_line/2,
+           input_lines/2
           ]).
 
 :- use_module(utils).
@@ -40,6 +41,22 @@ input_file(Day, Filename) :-
 input(Day, Input) :-
     input_file(Day, Filename),
     readutil:read_file_to_string(Filename, Input, []).
+
+%! input(+Day, -Lines)
+%
+% Read the output for the given day, split it into lines, and unify
+% Lines with the result.
+input_lines(Day, Lines) :-
+    input(Day, Input),
+    split_string(Input, "\n", "", Lines0),
+    remove_empty(Lines0, Lines).
+
+remove_empty([], []).
+remove_empty([""|List], Out) :-
+    !,
+    remove_empty(List, Out).
+remove_empty([Line|List], [Line|Out]) :-
+    remove_empty(List, Out).
 
 %! input_line(+Day, -Line)
 %

@@ -3,7 +3,8 @@
                   next_integer/1,
                   next_integer/2,
                   seq/3,
-                  split_at/4
+                  split_at/4,
+                  get_assoc_default/4
                  ]).
 
 %! Unify Width with the width of lines in Str.
@@ -39,3 +40,10 @@ split_at([], _Elem, [], []).
 split_at([Elem|List], Elem, [], List) :- !.
 split_at([Elem|List], Sep, [Elem|L0], R0) :-
     split_at(List, Sep, L0, R0).
+
+%! Like get_assoc/3, but binds a default value if the key does not
+% exist.
+get_assoc_default(Key, Assoc, Value, _Default) :-
+    get_assoc(Key, Assoc, Value),
+    !.
+get_assoc_default(_Key, _Assoc, Default, Default).
