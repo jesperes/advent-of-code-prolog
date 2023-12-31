@@ -6,43 +6,61 @@
                aocdata,
                library(clpfd)]).
 
-range_rule(VarIn, VarOut, DestStart, SourceStart, Len, Rule) :-
-    (VarIn #>= SourceStart #/\ VarIn #< (SourceStart + Len)) #<==> Rule,
-    Rule #==> (VarOut #= (DestStart + (VarIn - SourceStart))).
+apply_range_rules(_, [], _, []).
+apply_range_rules(X, [Range|Ranges], Y, [Cond|Conds]) :-
+    Range = [DstStart, SrcStart, Len],
+    (X #>= SrcStart #/\ X #< (SrcStart + Len)) #<==> Cond,
+    Cond #==> (Y #= (DstStart + (X - SrcStart))),
+    apply_range_rules(X, Ranges, Y, Conds).
 
-default(VarIn, VarOut, Rule) :-
-    (VarIn #= VarOut) #<==> Rule.
+apply_map(X, Ranges, Y) :-
+    apply_range_rules(X, Ranges, Y, Conds),
+    sum(Conds, #=, NumConds),
+    (NumConds #= 0) #==> (X #= Y).
 
-%% apply_range_rule([], _, [], []).
-%% apply_range_rule([X|Xs], Rule, [Y|Ys], [Cond|Conds]) :-
-%%     Rule = [DstStart, SrcStart, Len],
-%%     (X #>= SrcStart #/\ X #< (SrcStart + Len)) #<==> Cond,
-%%     Cond #==> (Y #= (DstStart + (X - SourceStart))).
-%%     apply_range_rule(Xs, Rule, Ys, Conds).
+apply_maps(X, [], X).
+apply_maps(X, [Map|Maps], Z) :-
+    apply_map(X, Map, Y),
+    apply_maps(Y, Maps, Z).
 
-%% apply_map(Vars, [], Vars).
-%% apply_map(VarsIn, [Range|Rest], VarsOut) :-
-%%     apply_range_rule(VarsIn, Range, VarsOut, Conds),
+test_constraints(Y) :-
 
+    (X #= 79) #\/ (X #= 14) #\/ (X #= 55) #\/ (X #= 13),
+    Y in 0..99,
 
+    apply_maps(X,
 
-test_constraints(Result) :-
+               % seed-to-soil
+               [[[50, 98, 2],
+                 [52, 50, 48]],
 
-    X1 in 0..99,
-    Y1 in 0..99,
+                % soil-to-fertilizer
+                [[0, 15, 37],
+                 [37, 52, 2],
+                 [39, 0, 15]],
 
-    %% apply_map([X],
-    %%           [[50, 98, 2],
-    %%            [52, 50, 48]],
-    %%           [Y]).
+                % fertilizer-to-water
+                [[49, 53, 8],
+                 [0, 11, 42],
+                 [42, 0, 7],
+                 [57, 7, 4]],
 
-    % seed-to-soil
-    range_rule(X1, Y1, 50, 98, 2, RuleY1),
-    range_rule(X1, Y1, 52, 50, 48, RuleY2),
-    default(X1, Y1, RuleY3),
-    (RuleY1 #= 0) #/\ (RuleY2 #= 0) #==> RuleY3 #= 1,
+                % water-to-light
+                [[88, 18, 7],
+                 [18, 25, 70]],
 
-    indomain(X1),
-    indomain(Y1),
+                % light-to-temperature
+                [[45, 77, 23],
+                 [81, 45, 19],
+                 [68, 64, 13]],
 
-    Result=X1-Y1.
+                % temperature-to-humidity
+                [[0, 69, 1],
+                 [1, 0, 69]],
+
+                % humidity-to-location
+                [[60, 56, 37],
+                 [56, 93, 4]]],
+              Y),
+
+    labeling([min(Y)], [X, Y]).
