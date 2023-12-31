@@ -7,7 +7,7 @@
 :- use_module(day02, [solve/1 as solve_day2 ] ).
 :- use_module(day03, [solve/1 as solve_day3 ] ).
 :- use_module(day04, [solve/1 as solve_day4 ] ).
-
+:- use_module(day05, [solve/1 as solve_day5 ] ).
 
 main(_) :-
     format("Benchmarking...~n", []),
