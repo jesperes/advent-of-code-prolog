@@ -1,5 +1,5 @@
-:- module(day05, [
-                  test_constraints/1
+:- module(day05, [ex1/1,
+                  ex2/1
                  ]).
 
 :- use_module([utils,
@@ -23,44 +23,60 @@ apply_maps(X, [Map|Maps], Z) :-
     apply_map(X, Map, Y),
     apply_maps(Y, Maps, Z).
 
-test_constraints(Y) :-
+example_data([[[50, 98, 2],
+               [52, 50, 48]],
 
-    (X #= 79) #\/ (X #= 14) #\/ (X #= 55) #\/ (X #= 13),
-    Y in 0..99,
+              % soil-to-fertilizer
+              [[0, 15, 37],
+               [37, 52, 2],
+               [39, 0, 15]],
 
-    apply_maps(X,
+              % fertilizer-to-water
+              [[49, 53, 8],
+               [0, 11, 42],
+               [42, 0, 7],
+               [57, 7, 4]],
 
-               % seed-to-soil
-               [[[50, 98, 2],
-                 [52, 50, 48]],
+              % water-to-light
+              [[88, 18, 7],
+               [18, 25, 70]],
 
-                % soil-to-fertilizer
-                [[0, 15, 37],
-                 [37, 52, 2],
-                 [39, 0, 15]],
+              % light-to-temperature
+              [[45, 77, 23],
+               [81, 45, 19],
+               [68, 64, 13]],
 
-                % fertilizer-to-water
-                [[49, 53, 8],
-                 [0, 11, 42],
-                 [42, 0, 7],
-                 [57, 7, 4]],
+              % temperature-to-humidity
+              [[0, 69, 1],
+               [1, 0, 69]],
 
-                % water-to-light
-                [[88, 18, 7],
-                 [18, 25, 70]],
+              % humidity-to-location
+              [[60, 56, 37],
+               [56, 93, 4]]]).
 
-                % light-to-temperature
-                [[45, 77, 23],
-                 [81, 45, 19],
-                 [68, 64, 13]],
+ex1(Location) :-
+    (Seed #= 79) #\/ (Seed #= 14) #\/ (Seed #= 55) #\/ (Seed #= 13),
+    Location in 0..99,
 
-                % temperature-to-humidity
-                [[0, 69, 1],
-                 [1, 0, 69]],
+    example_data(Maps),
+    apply_maps(Seed, Maps, Location),
 
-                % humidity-to-location
-                [[60, 56, 37],
-                 [56, 93, 4]]],
-              Y),
+    % Find the smallest location possible
+    once(labeling([min(Location)], [Seed, Location])).
 
-    labeling([min(Y)], [X, Y]).
+ex2(Location) :-
+    Seed1 in 79..92,
+    Seed2 in 55..67,
+    Location in 0..99,
+    Location1 in 0..99,
+    Location2 in 0..99,
+
+    example_data(Maps),
+    apply_maps(Seed1, Maps, Location1),
+    apply_maps(Seed2, Maps, Location2),
+
+    (Location1 #< Location2) #==> (Location #= Location1),
+    (Location1 #>= Location2) #==> (Location #= Location2),
+
+    % Find the smallest location possible
+    labeling([min(Location)], [Seed1, Seed2, Location1, Location2, Location]).
