@@ -1,77 +1,85 @@
-:- module(day05, [ex1/1,
-                  ex2/1
-                 ]).
+:- module(day05, [solve/1]).
 
 :- use_module([utils,
                aocdata,
+               library(pcre),
                library(clpfd)]).
 
-apply_range_rules(_, [], _, []).
-apply_range_rules(X, [Range|Ranges], Y, [Cond|Conds]) :-
+apply_range_rules(_, [], _, [], LS) :-
+    empty_fdset(LS).
+apply_range_rules(X, [Range|Ranges], Y, [Cond|Conds], LSOut) :-
     Range = [DstStart, SrcStart, Len],
     (X #>= SrcStart #/\ X #< (SrcStart + Len)) #<==> Cond,
     Cond #==> (Y #= (DstStart + (X - SrcStart))),
-    apply_range_rules(X, Ranges, Y, Conds).
+    apply_range_rules(X, Ranges, Y, Conds, LS0),
+    Min is DstStart,
+    Max is DstStart + Len - 1,
+    fdset_interval(Int, Min, Max),
+    fdset_union(Int, LS0, LSOut).
 
-apply_map(X, Ranges, Y) :-
-    apply_range_rules(X, Ranges, Y, Conds),
+apply_map(X, Ranges, Y, LS) :-
+    apply_range_rules(X, Ranges, Y, Conds, LS),
     sum(Conds, #=, NumConds),
     (NumConds #= 0) #==> (X #= Y).
 
-apply_maps(X, [], X).
-apply_maps(X, [Map|Maps], Z) :-
-    apply_map(X, Map, Y),
-    apply_maps(Y, Maps, Z).
+apply_maps(X, [], X, LocSet) :-
+    empty_fdset(LocSet).
+apply_maps(X, [Map|Maps], Z, LocSet) :-
+    apply_map(X, Map, Y, LS),
+    apply_maps(Y, Maps, Z, LS0),
+    fdset_union(LS, LS0, LocSet).
 
-example_data([[[50, 98, 2],
-               [52, 50, 48]],
-
-              % soil-to-fertilizer
-              [[0, 15, 37],
-               [37, 52, 2],
-               [39, 0, 15]],
-
-              % fertilizer-to-water
-              [[49, 53, 8],
-               [0, 11, 42],
-               [42, 0, 7],
-               [57, 7, 4]],
-
-              % water-to-light
-              [[88, 18, 7],
-               [18, 25, 70]],
-
-              % light-to-temperature
-              [[45, 77, 23],
-               [81, 45, 19],
-               [68, 64, 13]],
-
-              % temperature-to-humidity
-              [[0, 69, 1],
-               [1, 0, 69]],
-
-              % humidity-to-location
-              [[60, 56, 37],
-               [56, 93, 4]]]).
-
-ex1(Location) :-
-    example_data(Maps),
-
-    (Seed #= 79) #\/ (Seed #= 14) #\/ (Seed #= 55) #\/ (Seed #= 13),
-    Location in 0..99,
-
-    apply_maps(Seed, Maps, Location),
-
-    % Find the smallest location possible
+solve({part1, Location}) :-
+    parse1(Seed, Maps),
+    apply_maps(Seed, Maps, Location, LocSet),
+    Location in_set LocSet,
+    once(labeling([min(Location)], [Seed, Location])).
+solve({part2, Location}) :-
+    parse2(Seed, Maps),
+    apply_maps(Seed, Maps, Location, LocSet),
+    Location in_set LocSet,
     once(labeling([min(Location)], [Seed, Location])).
 
-ex2(Seed-Location) :-
-    example_data(Maps),
+% Parser
+parse1(Seed, Maps) :-
+    parsed_input(SeedInts, Maps),
+    list_to_fdset(SeedInts, FDSet),
+    Seed in_set FDSet.
 
-    (Seed in 79..92) #\/ (Seed in 55..67),
-    Location in 0..99,
+parse2(Seed, Maps) :-
+    parsed_input(SeedInts, Maps),
+    seedlist_to_fdset(SeedInts, FDSet),
+    Seed in_set FDSet.
 
-    apply_maps(Seed, Maps, Location),
+seedlist_to_fdset([], Seed) :-
+    empty_fdset(Seed).
+seedlist_to_fdset([Min, Len|Rest], FDSet) :-
+    Max is Min + Len - 1,
+    fdset_interval(Interval, Min, Max),
+    seedlist_to_fdset(Rest, FDSetRest),
+    fdset_union(Interval, FDSetRest, FDSet).
 
-    %% % Find the smallest location possible
-    labeling([min(Location)], [Seed, Location]).
+parsed_input(SeedInts, Maps) :-
+    input(5, Input),
+    re_split("\n\n", Input, [SeedStr|Sections]),
+    split_string(SeedStr, " ", "", [_Header|SeedStrs]),
+    maplist(number_string, SeedInts, SeedStrs),
+    input_sections_to_maps(Sections, Maps).
+
+input_sections_to_maps([], []).
+input_sections_to_maps(["\n\n"|Rest], Maps) :-
+    !,
+    input_sections_to_maps(Rest, Maps).
+input_sections_to_maps([Str|Rest], [Map|Maps]) :-
+    split_string(Str, "\n", "", [_Header|Lines]),
+    split_ranges(Lines, Map),
+    input_sections_to_maps(Rest, Maps).
+
+split_ranges([], []).
+split_ranges([""|Rest], Maps) :-
+    !,
+    split_ranges(Rest, Maps).
+split_ranges([Line|Rest], [Map|Maps]) :-
+    split_string(Line, " ", "", L),
+    maplist(number_string, Map, L),
+    split_ranges(Rest, Maps).
